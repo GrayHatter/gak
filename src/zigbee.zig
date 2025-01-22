@@ -4,11 +4,17 @@ pub fn main() !void {
     log.err("startup", .{});
     const a = std.heap.page_allocator;
 
-    var client = mqtt.Client.init(a, "localhost", 1883) catch |e| {
+    var client = mqtt.Client.init(a, "localhost", 1883, .{}) catch |e| {
         log.err("unable to connect to host", .{});
         return e;
     };
-    try client.connect();
+
+    if (try client.connect()) {
+        try client.send(mqtt.Subscribe{ .channels = &.{"zigbee2mqtt/#"} });
+    } else {
+        log.err("Unable to connect", .{});
+        @panic("not possible");
+    }
 
     var zigbee = Zigbee.init(a, &client);
 
@@ -17,7 +23,6 @@ pub fn main() !void {
             .CONNACK => {
                 log.err("loop", .{});
                 log.err("CONNACK", .{});
-                try client.send(mqtt.Subscribe{ .channels = &.{"zigbee2mqtt/#"} });
             },
             .PUBLISH => |publ| {
                 //log.err("PUBLISH [{s}]", .{publ.topic_name});
