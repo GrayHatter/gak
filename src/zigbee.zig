@@ -255,6 +255,11 @@ pub const Device = struct {
         sensitivity: ?usize = null,
         power_on_behavior: PowerOn = .nos,
 
+        // button thingy
+        battery: ?f64 = null,
+        action: Buttons12Way = .nos,
+
+        // Power meter
         voltage: ?f64 = null,
         ac_frequency: ?usize = null,
         state: PowerOn = .nos,
@@ -270,6 +275,22 @@ pub const Device = struct {
         off,
         toggle,
         previous,
+    };
+
+    pub const Buttons12Way = enum {
+        nos,
+        @"1_single",
+        @"1_double",
+        @"1_hold",
+        @"2_single",
+        @"2_double",
+        @"2_hold",
+        @"3_single",
+        @"3_double",
+        @"3_hold",
+        @"4_single",
+        @"4_double",
+        @"4_hold",
     };
 
     pub fn initZ2m(zb: *Zigbee, z2m_bd: Z2m.bridge.devices) !Device {
@@ -326,7 +347,11 @@ pub const Device = struct {
                     return edge;
                 }
             },
-            PowerOn => {
+            PowerOn, Buttons12Way => {
+                if (payload.len == 0) {
+                    defer field.* = .nos;
+                    return field.* != @as(T, .nos);
+                }
                 inline for (@typeInfo(T).Enum.fields) |en| {
                     if (eqlAny(en.name, payload)) {
                         defer field.* = @enumFromInt(en.value);
