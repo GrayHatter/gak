@@ -58,7 +58,31 @@ pub fn main() !void {
 const Z2m = struct {
     const bridge = struct {
         const state = struct {};
-        const info = struct {};
+        const info = struct {
+            commit: ?[]const u8 = null,
+            config: ?struct {} = null,
+            config_schema: ?struct {} = null,
+            coordinator: ?struct {
+                ieee_address: []const u8,
+                meta: struct {},
+                type: []const u8,
+            } = null,
+            log_level: ?[]const u8 = null,
+            network: ?struct {
+                channel: usize,
+                extended_pan_id: usize,
+                pan_id: usize,
+            },
+            permit_join: bool,
+            restart_required: bool,
+            version: []const u8,
+            zigbee_herdsman: struct {
+                version: []const u8,
+            },
+            zigbee_herdsman_converters: struct {
+                version: []const u8,
+            },
+        };
         const logging = struct {
             level: []const u8,
             message: []const u8,
@@ -435,6 +459,7 @@ pub const Zigbee = struct {
             );
 
             log.err("info {any}", .{res.value});
+            log.err("info payload {s}", .{p.payload});
         } else if (std.mem.startsWith(u8, p.topic_name[18..], "/devices")) {
             const res = try std.json.parseFromSlice(
                 []Z2m.bridge.devices,
