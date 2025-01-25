@@ -1,4 +1,4 @@
-const mqtt = @import("mqtt");
+pub const sun = @import("sun.zig");
 
 pub fn main() !void {
     log.err("startup", .{});
@@ -396,7 +396,6 @@ pub const Device = struct {
         inline for (@typeInfo(State).Struct.fields) |field| {
             if (eql(u8, target[1..], field.name)) {
                 if (d.updateTyped(field.type, field.name, payload)) {
-                    log.err("edge on [{s}] at {s} with {s}", .{ d.name, target, payload });
                     if (eql(u8, "office/mmw0", d.name) and eql(u8, target, "/presence")) {
                         log.err("sendable because {any}", .{payload});
                         try zb.client.send(mqtt.Publish{
@@ -405,6 +404,9 @@ pub const Device = struct {
                             .properties = "",
                             .payload = if (d.state.presence.?) "ON" else "OFF",
                         });
+                    }
+                    if (!eql(u8, target, "/linkquality")) {
+                        log.err("edge on [{s}] at {s} with {s}", .{ d.name, target, payload });
                     }
                 }
                 return;
@@ -527,7 +529,10 @@ pub const Zigbee = struct {
 
 test "main" {
     std.testing.refAllDecls(@This());
+    _ = &sun;
 }
+
+const mqtt = @import("mqtt");
 
 const std = @import("std");
 const Allocator = std.mem.Allocator;
