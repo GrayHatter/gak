@@ -4,8 +4,8 @@
     //.minimum_zig_version = "0.11.0",
     .dependencies = .{
         .mqtt = .{
-            .url = "git+https://github.com/GrayHatter/mqtt.git#1c6d809266e53049cac98d9ca27a37f1b875c5f6",
-            .hash = "1220e9f635e23147a4677a0db093562a1c8a45228f209b2260630e2cdadfbb099a1a",
+            .url = "git+https://github.com/GrayHatter/mqtt.git#e1afc44f9964bc95c960b5f420a64f704a0c97cc",
+            .hash = "1220c82c26fd2029c86570bc49a275d7e25ba577c73cd085579ab7e0d2e2d24246aa",
         },
     },
     .paths = .{
