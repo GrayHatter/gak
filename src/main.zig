@@ -20,17 +20,17 @@ pub fn main() !void {
 
     while (client.recv()) |pkt| {
         switch (pkt) {
-            .CONNACK => {
+            .connack => {
                 log.err("loop", .{});
                 log.err("CONNACK", .{});
             },
-            .PUBLISH => |publ| {
+            .publish => |publ| {
                 //log.err("PUBLISH [{s}]", .{publ.topic_name});
                 if (std.mem.startsWith(u8, publ.topic_name, "zigbee2mqtt")) {
                     try zigbee.publish(publ);
                 }
             },
-            .SUBACK => {
+            .suback => {
                 log.err("SUBACK ", .{});
             },
             else => |tag| {
