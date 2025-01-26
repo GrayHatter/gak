@@ -291,6 +291,11 @@ pub const Device = struct {
         current: ?f64 = null,
         power_factor: ?f64 = null,
         energy: ?f64 = null,
+
+        // Sensor thingy
+        battery_low: ?bool = null,
+        tamper: ?bool = null,
+        occupancy: ?bool = null,
     };
 
     pub const PowerOn = enum {
