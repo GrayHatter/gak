@@ -91,6 +91,17 @@ pub const Device = struct {
         battery_low: ?bool = null,
         tamper: ?bool = null,
         occupancy: ?bool = null,
+
+        // Color Lights
+        @"color-hue": ?usize = null,
+        @"color-h": ?usize = null,
+        @"color-saturation": ?usize = null,
+        @"color-s": ?usize = null,
+        @"color-x": ?usize = null,
+        @"color-y": ?usize = null,
+        @"color-temp": ?usize = null,
+        brightness: ?usize = null,
+        color_temp_startup: ?usize = null,
     };
 
     pub const PowerOn = enum {
