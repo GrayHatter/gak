@@ -97,11 +97,13 @@ pub const Device = struct {
         @"color-h": ?usize = null,
         @"color-saturation": ?usize = null,
         @"color-s": ?usize = null,
-        @"color-x": ?usize = null,
-        @"color-y": ?usize = null,
+        @"color-x": ?f64 = null,
+        @"color-y": ?f64 = null,
         @"color-temp": ?usize = null,
         brightness: ?usize = null,
         color_temp_startup: ?usize = null,
+        color_temp: ?usize = null,
+        color_mode: ?ColorMode = null,
     };
 
     pub const ManyKind = enum {
@@ -134,6 +136,10 @@ pub const Device = struct {
         @"4_single",
         @"4_double",
         @"4_hold",
+    };
+
+    pub const ColorMode = enum {
+        color_temp,
     };
 
     pub fn initZ2m(zb: *Zigbee, z2m_bd: Z2m.bridge.devices) !Device {
@@ -190,7 +196,7 @@ pub const Device = struct {
                     return edge;
                 }
             },
-            ?PowerOn, ?Buttons => {
+            ?PowerOn, ?Buttons, ?ColorMode => {
                 if (payload.len == 0) {
                     defer field.* = null;
                     return field.* != null;
