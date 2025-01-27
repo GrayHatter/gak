@@ -379,8 +379,8 @@ pub const Zigbee = struct {
 };
 
 test "main" {
-    std.testing.refAllDecls(@This());
     _ = &sun;
+    _ = &Rules;
 }
 
 const mqtt = @import("mqtt");

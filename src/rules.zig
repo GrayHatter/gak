@@ -1,84 +1,103 @@
-pub const Rules = struct {
-    // edge falling device/name/attribute
-    //
-    //   do <complex target>
-    //   set <device> [verb] <noun>
-    // when office/mmw0/presence goes false set office/lights off
-    // when office/mmw0/presence goes true  set office/lights on
-    //
-    // sequence
-    //
-    //
+alloc: Allocator,
+rules: std.ArrayList(Rule),
 
-    pub const Rule = struct {
-        rule: Kind,
-        target: []const u8,
-        action: Action = .{},
+// edge falling device/name/attribute
+//
+//   do <complex target>
+//   set <device> [verb] <noun>
+// when office/mmw0/presence goes false set office/lights off
+// when office/mmw0/presence goes true  set office/lights on
+//
+// sequence
+//
+//
 
-        pub const Kind = union(enum) {
-            edge: Direction,
-            slope: struct {
-                direction: Direction,
-                vect: f64,
-            },
-        };
+const Rules = @This();
+pub const Rule = struct {
+    rule: Kind,
+    target: []const u8,
+    action: Action = .{},
 
-        pub const Direction = enum {
-            falling,
-            rising,
-        };
-
-        pub const Action = struct {};
+    pub const Kind = union(enum) {
+        edge: Direction,
+        slope: struct {
+            direction: Direction,
+            vect: f64,
+        },
     };
 
-    pub fn parse(a: Allocator, str: []const u8) ![]Rule {
-        var list = std.ArrayList(Rule).init(a);
-        errdefer list.deinit();
-        var tokens = std.mem.tokenizeScalar(u8, str, ' ');
+    pub const Direction = enum {
+        falling,
+        rising,
+    };
 
-        while (tokens.next()) |next| {
-            if (eqlAny(next, "edge")) {
-                const peek = tokens.peek() orelse return error.InvalidSyntax;
+    pub const Action = struct {};
+};
 
-                if (eqlAny(peek, "falling")) {
-                    try list.append(.{
-                        .rule = .{ .edge = .falling },
-                        .target = "",
-                    });
-                    _ = tokens.next();
-                } else {
-                    try list.append(.{
-                        .rule = .{ .edge = .rising },
-                        .target = "",
-                    });
-                    _ = tokens.next();
-                }
+pub fn init(a: Allocator) Rules {
+    return .{
+        .alloc = a,
+        .rules = std.ArrayList(Rule).init(a),
+    };
+}
+
+pub fn raze(r: *Rules) void {
+    r.rules.deinit();
+}
+
+pub fn parseLine(str: []const u8) !Rule {
+    var tokens = std.mem.tokenizeScalar(u8, str, ' ');
+
+    while (tokens.next()) |next| {
+        if (eqlAny(next, "edge")) {
+            const peek = tokens.peek() orelse return error.InvalidSyntax;
+
+            if (eqlAny(peek, "falling")) {
+                return .{
+                    .rule = .{ .edge = .falling },
+                    .target = "",
+                };
+            } else {
+                return .{
+                    .rule = .{ .edge = .rising },
+                    .target = "",
+                };
             }
         }
-        return try list.toOwnedSlice();
     }
+    return error.UnableToBuildRule;
+}
 
-    test parse {
-        const a = std.testing.allocator;
-
-        const empty = try parse(a, "");
-        try std.testing.expectEqual(&[0]Rule{}, empty);
-
-        const one = try parse(a, "edge falling");
-        defer a.free(one);
-        try std.testing.expectEqualDeep(&[1]Rule{.{
-            .rule = .{ .edge = .falling },
-            .target = "",
-        }}, one);
-
-        const one_ri = try parse(a, "edge rising");
-        defer a.free(one_ri);
-        try std.testing.expectEqualDeep(&[1]Rule{.{
-            .rule = .{ .edge = .rising },
-            .target = "",
-        }}, one_ri);
+pub fn parseFile(r: *Rules, str: []const u8) !void {
+    var lines = std.mem.tokenizeScalar(u8, str, '\n');
+    while (lines.next()) |line| {
+        r.rules.append(try r.parseLine(line) catch |err| switch (err) {
+            error.UnableToBuildRule => continue,
+            else => return err,
+        });
     }
-};
+}
+
+test parseLine {
+    const a = std.testing.allocator;
+    var r = init(a);
+    defer r.raze();
+
+    const empty = parseLine("");
+    try std.testing.expectError(error.UnableToBuildRule, empty);
+
+    const rule_fall = try parseLine("edge falling");
+    try std.testing.expectEqualDeep(Rule{
+        .rule = .{ .edge = .falling },
+        .target = "",
+    }, rule_fall);
+
+    const rule_rise = try parseLine("edge rising");
+    try std.testing.expectEqualDeep(Rule{
+        .rule = .{ .edge = .rising },
+        .target = "",
+    }, rule_rise);
+}
 
 const std = @import("std");
 const Allocator = std.mem.Allocator;
