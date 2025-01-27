@@ -201,7 +201,7 @@ pub const Device = struct {
                     defer field.* = null;
                     return field.* != null;
                 }
-                inline for (@typeInfo(@typeInfo(T).Optional.child).Enum.fields) |en| {
+                inline for (@typeInfo(@typeInfo(T).optional.child).@"enum".fields) |en| {
                     if (eqlAny(en.name, payload)) {
                         defer field.* = @enumFromInt(en.value);
                         return field.* == null or field.*.? != @as(T, @enumFromInt(en.value));
@@ -220,9 +220,9 @@ pub const Device = struct {
                     return field.* != null;
                 }
                 const prev_v = field.*;
-                inline for (@typeInfo(@typeInfo(T).Optional.child).Union.fields) |un| {
+                inline for (@typeInfo(@typeInfo(T).optional.child).@"union".fields) |un| {
                     //const prev_t = field.* != null and field.* == un;
-                    inline for (@typeInfo(un.type).Enum.fields) |en| {
+                    inline for (@typeInfo(un.type).@"enum".fields) |en| {
                         if (eqlAny(en.name, payload)) {
                             const next = @unionInit(Many, un.name, @as(un.type, @enumFromInt(en.value)));
                             defer field.* = next;
@@ -244,7 +244,7 @@ pub const Device = struct {
     pub fn update(d: *Device, zb: *Zigbee, name: []const u8, payload: []const u8) !void {
         const target = name[d.name.len..];
         if (target.len == 0) return;
-        inline for (@typeInfo(State).Struct.fields) |field| {
+        inline for (@typeInfo(State).@"struct".fields) |field| {
             if (eql(u8, target[1..], field.name)) {
                 if (d.updateTyped(field.type, field.name, payload)) {
                     if (eql(u8, "office/mmw0", d.name) and eql(u8, target, "/presence")) {
