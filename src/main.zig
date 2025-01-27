@@ -204,7 +204,7 @@ pub const Device = struct {
                 inline for (@typeInfo(@typeInfo(T).Optional.child).Enum.fields) |en| {
                     if (eqlAny(en.name, payload)) {
                         defer field.* = @enumFromInt(en.value);
-                        return field.* != null and field.*.? != @as(T, @enumFromInt(en.value));
+                        return field.* == null or field.*.? != @as(T, @enumFromInt(en.value));
                     }
                 } else {
                     log.err(
@@ -226,7 +226,7 @@ pub const Device = struct {
                         if (eqlAny(en.name, payload)) {
                             const next = @unionInit(Many, un.name, @as(un.type, @enumFromInt(en.value)));
                             defer field.* = next;
-                            return prev_v != null and @TypeOf(prev_v) == @TypeOf(next);
+                            return prev_v == null or @TypeOf(prev_v) != @TypeOf(next);
                         }
                     }
                 } else {
