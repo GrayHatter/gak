@@ -72,16 +72,16 @@ pub const Device = struct {
         maximum_range: ?f64 = null,
         target_distance: ?f64 = null,
         sensitivity: ?usize = null,
-        power_on_behavior: PowerOn = .nos,
+        power_on_behavior: ?PowerOn = null,
 
         // button thingy
         battery: ?f64 = null,
-        action: Buttons12Way = .nos,
+        action: ?Many = null,
 
         // Power meter
         voltage: ?f64 = null,
         ac_frequency: ?usize = null,
-        state: PowerOn = .nos,
+        state: ?PowerOn = null,
         power: ?f64 = null,
         current: ?f64 = null,
         power_factor: ?f64 = null,
@@ -104,16 +104,24 @@ pub const Device = struct {
         color_temp_startup: ?usize = null,
     };
 
+    pub const ManyKind = enum {
+        power,
+        buttons,
+    };
+
+    pub const Many = union(ManyKind) {
+        power: PowerOn,
+        buttons: Buttons,
+    };
+
     pub const PowerOn = enum {
-        nos,
         on,
         off,
         toggle,
         previous,
     };
 
-    pub const Buttons12Way = enum {
-        nos,
+    pub const Buttons = enum {
         @"1_single",
         @"1_double",
         @"1_hold",
@@ -182,18 +190,44 @@ pub const Device = struct {
                     return edge;
                 }
             },
-            PowerOn, Buttons12Way => {
+            ?PowerOn, ?Buttons => {
                 if (payload.len == 0) {
-                    defer field.* = .nos;
-                    return field.* != @as(T, .nos);
+                    defer field.* = null;
+                    return field.* != null;
                 }
-                inline for (@typeInfo(T).Enum.fields) |en| {
+                inline for (@typeInfo(@typeInfo(T).Optional.child).Enum.fields) |en| {
                     if (eqlAny(en.name, payload)) {
                         defer field.* = @enumFromInt(en.value);
-                        return field.* != @as(T, @enumFromInt(en.value));
+                        return field.* != null and field.*.? != @as(T, @enumFromInt(en.value));
                     }
                 } else {
-                    log.err("unable to parse enum on {s} with [{s}]{any}", .{ fname, payload, payload });
+                    log.err(
+                        "unable to parse enum on {s} with [{s}]{any} for {s}",
+                        .{ fname, payload, payload, d.name },
+                    );
+                    return false;
+                }
+            },
+            ?Many => {
+                if (payload.len == 0) {
+                    defer field.* = null;
+                    return field.* != null;
+                }
+                const prev_v = field.*;
+                inline for (@typeInfo(@typeInfo(T).Optional.child).Union.fields) |un| {
+                    //const prev_t = field.* != null and field.* == un;
+                    inline for (@typeInfo(un.type).Enum.fields) |en| {
+                        if (eqlAny(en.name, payload)) {
+                            const next = @unionInit(Many, un.name, @as(un.type, @enumFromInt(en.value)));
+                            defer field.* = next;
+                            return prev_v != null and @TypeOf(prev_v) == @TypeOf(next);
+                        }
+                    }
+                } else {
+                    log.err(
+                        "unable to parse union on {s} with [{s}]{any} for {s}",
+                        .{ fname, payload, payload, d.name },
+                    );
                     return false;
                 }
             },
