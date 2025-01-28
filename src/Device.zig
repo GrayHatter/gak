@@ -208,7 +208,7 @@ pub fn update(d: *Device, zb: *Zigbee, name: []const u8, payload: []const u8) !v
         }
     }
     // Sorry, trying to filter messages
-    if (std.mem.startsWith(u8, target, "/update")) {
+    if (startsWith(u8, target, "/update")) {
         if (target.len > 7 and (target[7] == '-' or target[7] == '_')) {
             return;
         }
@@ -225,8 +225,7 @@ const std = @import("std");
 const Allocator = std.mem.Allocator;
 const eql = std.mem.eql;
 const eqlAny = std.ascii.eqlIgnoreCase;
+const startsWith = std.mem.startsWith;
 const parseInt = std.fmt.parseInt;
 const parseFloat = std.fmt.parseFloat;
 const log = std.log.scoped(.zigbee);
-const AnyReader = std.io.AnyReader;
-const AnyWriter = std.io.AnyWriter;
