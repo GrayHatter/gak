@@ -25,8 +25,7 @@ pub fn main() !void {
                 log.err("CONNACK", .{});
             },
             .publish => |publ| {
-                //log.err("PUBLISH [{s}]", .{publ.topic_name});
-                if (std.mem.startsWith(u8, publ.topic_name, "zigbee2mqtt")) {
+                if (startsWith(u8, publ.topic_name, "zigbee2mqtt")) {
                     try zigbee.publish(publ);
                 }
             },
@@ -38,11 +37,9 @@ pub fn main() !void {
                 log.err("", .{});
                 log.err("", .{});
                 log.err("read [{s}]", .{@tagName(tag)});
-                //log.err("discarding {}", .{@min(ready, reported)});
                 log.err("", .{});
                 log.err("", .{});
                 log.err("", .{});
-                //fifo.discard(@min(ready, reported));
             },
         }
     } else |err| {
@@ -56,7 +53,6 @@ pub fn main() !void {
 }
 
 pub const Device = @import("Device.zig");
-
 pub const Zigbee = @import("Zigbee.zig");
 
 test "main" {
@@ -71,11 +67,5 @@ const Rules = @import("rules.zig");
 const Z2m = @import("z2m-data.zig").Z2m;
 
 const std = @import("std");
-const Allocator = std.mem.Allocator;
-const eql = std.mem.eql;
-const eqlAny = std.ascii.eqlIgnoreCase;
-const parseInt = std.fmt.parseInt;
-const parseFloat = std.fmt.parseFloat;
 const log = std.log.scoped(.zigbee);
-const AnyReader = std.io.AnyReader;
-const AnyWriter = std.io.AnyWriter;
+const startsWith = std.mem.startsWith;
