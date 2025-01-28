@@ -13,11 +13,11 @@ pub fn init(a: Allocator, client: *mqtt.Client) Zigbee {
 }
 
 pub fn publish(zb: *Zigbee, p: mqtt.Publish) !void {
-    if (std.mem.startsWith(u8, p.topic_name[11..], "/bridge")) {
+    if (startsWith(u8, p.topic_name[11..], "/bridge")) {
         try zb.bridge(p);
-    } else if (std.mem.startsWith(u8, p.topic_name[11..], "/bridge")) {} else {
+    } else if (startsWith(u8, p.topic_name[11..], "/bridge")) {} else {
         for (zb.devices.items) |*item| {
-            if (std.mem.startsWith(u8, p.topic_name[12..], item.name)) {
+            if (startsWith(u8, p.topic_name[12..], item.name)) {
                 //log.err("zigbee updating {s}", .{p.topic_name[12..]});
                 try item.update(zb, p.topic_name[12..], p.payload);
                 break;
@@ -29,8 +29,8 @@ pub fn publish(zb: *Zigbee, p: mqtt.Publish) !void {
 }
 
 pub fn bridge(zb: *Zigbee, p: mqtt.Publish) !void {
-    if (std.mem.startsWith(u8, p.topic_name[18..], "/info")) {
-        const res = try std.json.parseFromSlice(
+    if (startsWith(u8, p.topic_name[18..], "/info")) {
+        const res = try parseFromSlice(
             Z2m.bridge.info,
             std.heap.page_allocator,
             p.payload,
@@ -39,8 +39,8 @@ pub fn bridge(zb: *Zigbee, p: mqtt.Publish) !void {
 
         log.err("info {any}", .{res.value});
         log.err("info payload {s}", .{p.payload});
-    } else if (std.mem.startsWith(u8, p.topic_name[18..], "/devices")) {
-        const res = try std.json.parseFromSlice(
+    } else if (startsWith(u8, p.topic_name[18..], "/devices")) {
+        const res = try parseFromSlice(
             []Z2m.bridge.devices,
             std.heap.page_allocator,
             p.payload,
@@ -56,8 +56,8 @@ pub fn bridge(zb: *Zigbee, p: mqtt.Publish) !void {
                 };
             }
         }
-    } else if (std.mem.startsWith(u8, p.topic_name[18..], "/groups")) {
-        const res = try std.json.parseFromSlice(
+    } else if (startsWith(u8, p.topic_name[18..], "/groups")) {
+        const res = try parseFromSlice(
             []Z2m.bridge.groups,
             std.heap.page_allocator,
             p.payload,
@@ -66,8 +66,8 @@ pub fn bridge(zb: *Zigbee, p: mqtt.Publish) !void {
         for (res.value) |r| {
             log.err("{}", .{r});
         }
-    } else if (std.mem.startsWith(u8, p.topic_name[18..], "/definitions")) {
-        const res = std.json.parseFromSlice(
+    } else if (startsWith(u8, p.topic_name[18..], "/definitions")) {
+        const res = parseFromSlice(
             Z2m.bridge.definitions,
             std.heap.page_allocator,
             p.payload,
@@ -78,8 +78,8 @@ pub fn bridge(zb: *Zigbee, p: mqtt.Publish) !void {
             return;
         };
         log.err("{}", .{res.value});
-    } else if (std.mem.startsWith(u8, p.topic_name[18..], "/extensions")) {
-        const res = try std.json.parseFromSlice(
+    } else if (startsWith(u8, p.topic_name[18..], "/extensions")) {
+        const res = try parseFromSlice(
             []Z2m.bridge.extensions,
             std.heap.page_allocator,
             p.payload,
@@ -88,8 +88,8 @@ pub fn bridge(zb: *Zigbee, p: mqtt.Publish) !void {
         for (res.value) |r| {
             log.err("{}", .{r});
         }
-    } else if (std.mem.startsWith(u8, p.topic_name[18..], "/logging")) {
-        const res = try std.json.parseFromSlice(
+    } else if (startsWith(u8, p.topic_name[18..], "/logging")) {
+        const res = try parseFromSlice(
             Z2m.bridge.logging,
             std.heap.page_allocator,
             p.payload,
@@ -110,10 +110,6 @@ const mqtt = @import("mqtt");
 
 const std = @import("std");
 const Allocator = std.mem.Allocator;
-const eql = std.mem.eql;
-const eqlAny = std.ascii.eqlIgnoreCase;
-const parseInt = std.fmt.parseInt;
-const parseFloat = std.fmt.parseFloat;
+const startsWith = std.mem.startsWith;
+const parseFromSlice = std.json.parseFromSlice;
 const log = std.log.scoped(.zigbee);
-const AnyReader = std.io.AnyReader;
-const AnyWriter = std.io.AnyWriter;
