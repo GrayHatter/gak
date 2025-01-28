@@ -15,7 +15,7 @@ pub const Z2m = struct {
                 channel: usize,
                 extended_pan_id: usize,
                 pan_id: usize,
-            },
+            } = null,
             permit_join: bool,
             restart_required: bool,
             version: []const u8,
@@ -99,22 +99,22 @@ pub const Z2m = struct {
                 bindings: ?[]struct {
                     cluster: ?[]const u8,
                     target: ?struct {
-                        endpoint: ?usize,
+                        endpoint: ?usize = null,
                         ieee_address: ?[]const u8,
-                        type: ?[]const u8,
+                        type: ?[]const u8 = null,
                     },
                     configured_reportings: ?[]struct {
-                        attribute: []const u8,
-                        cluster: []const u8,
+                        attribute: ?[]const u8 = null,
+                        cluster: ?[]const u8 = null,
                         maximum_report_interval: usize,
                         minimum_report_interval: usize,
-                        reportable_change: usize,
+                        reportable_change: ?usize = null,
                     } = null,
                     scenes: ?[]struct {} = null,
                 } = null,
                 clusters: ?struct {
-                    input: ?[][]const u8,
-                    output: ?[][]const u8,
+                    input: ?[][]const u8 = null,
+                    output: ?[][]const u8 = null,
                 } = null,
             };
         };
