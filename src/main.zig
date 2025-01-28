@@ -18,29 +18,34 @@ pub fn main() !void {
 
     var zigbee = Zigbee.init(a, &client);
 
-    while (client.recv()) |pkt| {
-        switch (pkt) {
-            .connack => {
-                log.err("loop", .{});
-                log.err("CONNACK", .{});
-            },
-            .publish => |publ| {
-                if (startsWith(u8, publ.topic_name, "zigbee2mqtt")) {
-                    try zigbee.publish(publ);
-                }
-            },
-            .suback => {
-                log.err("SUBACK ", .{});
-            },
-            else => |tag| {
-                log.err("", .{});
-                log.err("", .{});
-                log.err("", .{});
-                log.err("read [{s}]", .{@tagName(tag)});
-                log.err("", .{});
-                log.err("", .{});
-                log.err("", .{});
-            },
+    while (client.recv()) |packet| {
+        if (packet) |pkt| {
+            switch (pkt) {
+                .connack => {
+                    log.err("loop", .{});
+                    log.err("CONNACK", .{});
+                },
+                .publish => |publ| {
+                    if (startsWith(u8, publ.topic_name, "zigbee2mqtt")) {
+                        try zigbee.publish(publ);
+                    }
+                },
+                .suback => {
+                    log.err("SUBACK ", .{});
+                },
+                else => |tag| {
+                    log.err("", .{});
+                    log.err("", .{});
+                    log.err("", .{});
+                    log.err("read [{s}]", .{@tagName(tag)});
+                    log.err("", .{});
+                    log.err("", .{});
+                    log.err("", .{});
+                },
+            }
+        } else {
+            // recv timeout, do software stuff
+            log.err("recv timeout", .{});
         }
     } else |err| {
         log.err("", .{});
@@ -56,6 +61,7 @@ pub const Device = @import("Device.zig");
 pub const Zigbee = @import("Zigbee.zig");
 
 test "main" {
+    _ = &main;
     _ = &sun;
     _ = &Rules;
     _ = &Device;
