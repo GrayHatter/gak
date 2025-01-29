@@ -18,6 +18,13 @@ pub fn main() !void {
 
     var zigbee = Zigbee.init(a, &client);
 
+    const file = std.fs.cwd().readFileAlloc(a, "./gakrc", 0x800000) catch |err| b: {
+        log.err("unable to load rc file {}", .{err});
+        break :b try a.dupe(u8, "");
+    };
+    defer a.free(file);
+    std.debug.print("file contents\n{s}\n", .{file});
+
     while (client.recv()) |packet| {
         if (packet) |pkt| {
             switch (pkt) {
