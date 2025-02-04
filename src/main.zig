@@ -25,6 +25,12 @@ pub fn main() !void {
     defer a.free(file);
     std.debug.print("file contents\n{s}\n", .{file});
 
+    var lines = std.mem.tokenizeScalar(u8, file, '\n');
+    const lat = try std.fmt.parseFloat(f64, lines.next() orelse "0");
+    const lon = try std.fmt.parseFloat(f64, lines.next() orelse "0");
+
+    log.err("lat {d} lon {d}", .{ lat, lon });
+
     while (client.recv()) |packet| {
         if (packet) |pkt| {
             switch (pkt) {
