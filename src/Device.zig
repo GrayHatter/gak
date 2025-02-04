@@ -32,6 +32,8 @@ pub const Hardware = struct {
     sensitivity: ?usize = null,
     power_on_behavior: ?PowerOn = null,
 
+    @"level_config-on_level": ?PowerOn = null,
+
     // button thingy
     battery: ?f64 = null,
     action: ?Many = null,
