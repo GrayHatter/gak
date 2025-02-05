@@ -58,7 +58,7 @@ pub fn main() !void {
             }
         } else {
             // recv timeout, do software stuff
-            log.err("recv timeout", .{});
+            log.debug("recv timeout", .{});
         }
     } else |err| {
         log.err("", .{});
@@ -86,5 +86,5 @@ const Rules = @import("rules.zig");
 const Z2m = @import("z2m-data.zig").Z2m;
 
 const std = @import("std");
-const log = std.log.scoped(.zigbee);
+const log = std.log.scoped(.gak);
 const startsWith = std.mem.startsWith;
