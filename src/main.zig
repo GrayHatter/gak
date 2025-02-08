@@ -48,11 +48,7 @@ pub fn main() !void {
                 },
                 else => |tag| {
                     log.err("", .{});
-                    log.err("", .{});
-                    log.err("", .{});
                     log.err("read [{s}]", .{@tagName(tag)});
-                    log.err("", .{});
-                    log.err("", .{});
                     log.err("", .{});
                 },
             }
@@ -61,8 +57,6 @@ pub fn main() !void {
             log.debug("recv timeout", .{});
         }
     } else |err| {
-        log.err("", .{});
-        log.err("", .{});
         log.err("", .{});
         log.err("recv error [{any}]", .{err});
     }
