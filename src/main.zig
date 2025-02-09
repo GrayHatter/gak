@@ -34,10 +34,7 @@ pub fn main() !void {
     while (client.recv()) |packet| {
         if (packet) |pkt| {
             switch (pkt) {
-                .connack => {
-                    log.err("loop", .{});
-                    log.err("CONNACK", .{});
-                },
+                .connack => {},
                 .publish => |publ| {
                     if (startsWith(u8, publ.topic_name, "zigbee2mqtt")) {
                         try zigbee.publish(publ);
@@ -47,9 +44,7 @@ pub fn main() !void {
                     log.err("SUBACK ", .{});
                 },
                 else => |tag| {
-                    log.err("", .{});
                     log.err("read [{s}]", .{@tagName(tag)});
-                    log.err("", .{});
                 },
             }
         } else {
